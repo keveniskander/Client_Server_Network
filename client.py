@@ -27,58 +27,40 @@ while input1 != 7:
 		
 	
 	if input1 == '3':
-		clientSocket.send(input1.encode())
-		output = clientSocket.recv(1024)
 
 		input2 = input('POST ')
-
-		commandInput = 'POST'
-		splitInput = input2.split()
-		lower_left = splitInput[0]
-		upper_right = splitInput[1]
-		width = splitInput[2]
-		height = splitInput[3]
-		color = splitInput[4]
-		message = splitInput[5:]
 		
-		# clientSocket.send(input2.encode())
+		input2 = 'POST ' + input2
+		clientSocket.send(input2.encode())
 
-		s = ' '
-		joinedMessage = s.join(message)
-		
-		print(lower_left)
-		print(upper_right)
-		print(width)
-		print(height)
-		print(color)
-		print(joinedMessage)
+		output = clientSocket.recv(1024)
 
-		a = [lower_left, upper_right, width, height, color, joinedMessage]
-		clientSocket.send(commandInput.encode())
+		print('From server:', output.decode())
 
-		input1 = 0
+
+		input1 = 7
 
 
 
 	elif input1 == '4':
 		input2 = input('GET ')
-		clientSocket.send(input1.encode())
+		
 		output = clientSocket.recv(1024)
 
 	elif input1 == '5':
 		input2 = input('PIN')
-		clientSocket.send(input1.encode())
+		
 		output = clientSocket.recv(1024)
 
 	elif input1 == '6':
 		input2 = input('UNPIN')
-		clientSocket.send(input1.encode())
+		
 		output = clientSocket.recv(1024)
 
 	elif input1 == '1':
 		print('...Connecting to server...')
-		clientSocket.send(input1.encode())
-		output = clientSocket.recv(1024)
+		
+		
 
 	elif input1 == '2':
 		print('...Disconnecting from server...')
@@ -86,7 +68,8 @@ while input1 != 7:
 
 	elif input1 == '7':
 		print('...Exiting program...')
-		output = clientSocket.recv(1024)
+		clientSocket.close()
+		sys.exit()
 		break
 	
 	input1 = input('Input: ')
