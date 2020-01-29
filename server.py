@@ -47,19 +47,17 @@ while True:
 	print('The server is ready to receive')
 	
 	# Set up a new connection from the client
-	connectionSocket, addr = serverSocket.accept()	
-
-	try:	
-		data = connectionSocket.recv(1024).decode()
-		print('Reveived data: ', input1)
-
-		if data:
-			print('Sending data back to client')
-			connectionSocket.sendall(output.encode())
+	connectionSocket, addr = serverSocket.accept()
 
 
-	finally:
-		serverSocket.close()	
+
+		
+	input1 = connectionSocket.recv(1024).decode()
+	print(input1)
+	output = 'Data received'
+	connectionSocket.send(output.encode())
+	if input1 == '7':
+		connectionSocket.close()
 	
 
 serverSocket.close()  
