@@ -21,18 +21,25 @@ print ('The server is ready to receive')
 
 # Server should be up and running and listening to the incoming connections
 
-class Note:
-	def __init__(self, x, y, width, height, pin, color, message):
-		self.x = x
-		self.y = y
+class Note(object):
+	message= ""
+	colour = ""
+	x = 0
+	y=0
+	height=0
+	pins=0
+	width=0
+
+	# The class "constructor" - It's actually an initializer ,pin
+	def __init__(self, x, y, width, height, colour, message, pins):
+		self.message = message
+		self.colour = colour
 		self.width = width
 		self.height = height
-		self.pin = pin
-		self.color
-		self.message
+		self.x = x
+		self.y = y
+		self.pins=pins
 
-	def getMessage(self):
-		return self.message
 	
 
 def pin(x,y):
@@ -51,13 +58,71 @@ while True:
 
 
 
+
+
+
+
+	
+	# splitInput = input1.split()
+	# lower_left = splitInput[1]
+	# upper_right = splitInput[2]
+	# width = splitInput[3]
+	# height = splitInput[4]
+	# color = splitInput[5]
+	# message = splitInput[6:]
+	
+	# s = ' '
+	# joinedMessage = s.join(message)
+	# newNote = Note(lower_left, lower_right, width, height, 'pinned', color, joinedMessage)
+	# if input1 == '3':
+	# 	output = 'case1'
+	# 	print(lower_left)
+	# 	print(upper_right)
+	# 	print(width)
+	# 	print(height)
+	# 	print('color', color)
+	# 	print(joinedMessage)
+
+	# elif input1 == '4':
+	# 	output = 'case2'
+
+	# elif input1 == '5':
+	# 	output = 'case3'
+	
+	# elif input1 == '6':
+	# 	output = 'case4'
+	
+	# elif input1 == '1':
+	# 	output = 'case 5'
+	
+	# elif input1 == '2':
+	# 	output = 'Disconnecting from server'
+	# 	connectionSocket.send(output.encode())
+	# 	connectionSocket.close()
 		
-	input1 = connectionSocket.recv(1024).decode()
-	print(input1)
-	output = 'Data received'
+	input2 = connectionSocket.recv(1024).decode()
+	print(input2)
+
+	splitInput = input2.split()
+	
+	commandInput = splitInput[0]
+
+	if commandInput == 'POST':
+		x = splitInput[1]
+		y = splitInput[2]
+		width = splitInput[3]
+		height = splitInput[4]
+		colour = splitInput[5]
+		message = splitInput[6:]
+
+		s = ' '
+		joinedMessage = s.join(message)
+
+		note = Note(x, y, width, height, colour, joinedMessage, 0)
+
+	output = commandInput
 	connectionSocket.send(output.encode())
-	if input1 == '7':
-		connectionSocket.close()
+	connectionSocket.close()
 	
 
 serverSocket.close()  
