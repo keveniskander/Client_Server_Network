@@ -1,104 +1,179 @@
 # Import socket module
 from socket import * 
 import sys # In order to terminate the program
+from builtins import *
 
-serverName = 'localhost'
+# Create a TCP server socket
+#(AF_INET is used for IPv4 protocols)
+#(SOCK_STREAM is used for TCP)
+
+serverSocket = socket(AF_INET, SOCK_STREAM)
+
 # Assign a port number
 serverPort = 1200
 
 # Bind the socket to server address and server port
-clientSocket = socket(AF_INET, SOCK_STREAM)
+serverSocket.bind(("", serverPort))
 
-clientSocket.connect((serverName, serverPort))
+# Listen to at most 1 connection at a time
+serverSocket.listen(5)
 
-print('1-connect')
-print('2-disconnect')
-print('3-POST')
-print('4-GET')
-print('5-PIN')
-print('6-UNPIN')
-print('7-exit')
+print ('The server is ready to receive')
 
-connectionEstablished = False
+# Server should be up and running and listening to the incoming connections
 
-input1 = input('Input: ')
+class Note(object):
+	message= ""
+	colour = ""
+	x = 0
+	y=0
+	height=0
+	pins=0
+	width=0
 
-while input1 != '7':
+	# The class "constructor" - It's actually an initializer ,pin
+	def __init__(self, x, y, width, height, colour, message, pins):
+		self.message = message
+		self.colour = colour
+		self.width = width
+		self.height = height
+		self.x = x
+		self.y = y
+		self.pins=pins
+
+	
+
+# def pin(x,y):
+# 	print('pinning')
+# 
+# def unpin(x,y):
+# 	print('unpinning')
+
+
+
+
+
+
+# Declaring board parameters
+boardWidth = sys.argv[2]
+boardHeight = sys.argv[3]
+colours = []
+noteList = []
+
+# def checkColour(colours, colour):
+# 	count = 0
+# 	for i in range(len(colours)):
+# 		if colours[i]==colour:
+# 			count+=1
+# 	
+# 	print(count)
+
+i = 4
+while i < (len(sys.argv) - 1):
+	colours.append(sys.argv[i])
+	i+=1
+
+
+while True:
+	print('The server is ready to receive')
+	
+	# Set up a new connection from the client
+	connectionSocket, addr = serverSocket.accept()
+
+	
+
+	input2 = connectionSocket.recv(1024).decode()
+	print(input2)
+
+	splitInput = input2.split()
+	if len(splitInput)>0:
+		commandInput = splitInput[0]
 		
 	
-	if input1 == '3':
-
-		input2 = input('POST ')
+	if input2 == 'EXIT':
+		print('lmao1')
+		output = '...Sys Exit...'
+		sys.exit()
 		
-		input2 = 'POST ' + input2
-		clientSocket.send(input2.encode())
-
-# 		output = clientSocket.recv(1024)
-
-		print('From server:', output.decode())
-
-
-		input1 = 7
-
-
-
-	elif input1 == '4':
-		input2 = input('GET ')
+	elif commandInput == 'connect':
+		print('connecting')
+		output = 'connecting'
 		
-		input2 = 'GET' + input2
-		clientSocket.send(input2.encode())
-		
-# 		output = clientSocket.recv(1024)
 
-	elif input1 == '5':
-		input2 = input('PIN ')
+	elif commandInput == 'disconnect':
+		print('disconnect')
+		output = 'disconnecting'
 		
-		input2 = 'PIN ' + input2
-		clientSocket.send(input2.encode())
-		
-# 		output = clientSocket.recv(1024)
 
-	elif input1 == '6':
-		input2 = input('UNPIN ')
-		
-# 		output = clientSocket.recv(1024)
+	elif commandInput == 'POST':
+		x = splitInput[1]
+		y = splitInput[2]
+		width = splitInput[3]
+		height = splitInput[4]
+		colour = splitInput[5]
+		message = splitInput[6:]
 
-	elif input1 == '1':
-		connectionEstablished = True
-		input2 = 'connect'
-		clientSocket.send(input2.encode())
+		s = ' '
+		joinedMessage = s.join(message)
 		
-# 		output = clientSocket.recv(1024)
-	elif input1 == '2':
-		print('...Disconnecting from server...')
-		input2 = 'disconnect'
-		clientSocket.send(input2.encode())
+		if (colour in colours):
 		
-# 		output = clientSocket.recv(1024)
-		clientSocket.close()
+			note = Note(x, y, width, height, colour, joinedMessage, 0)
+			noteList.append(note)
+			output = 'commandInput'
+		else:
+			output = 'ERROR: The note was not added since ' + colour + ' is not a valid colour'
+		
 
-	elif input1 == '7':
-		clientSocket.send('EXIT')
-		print('...Exiting program...')
+	elif commandInput == 'GET':
 		
-		input2()
-# 		output = clientSocket.recv(1024)
-# 		clientSocket.close()
-		sys.exit(0)
-		break
+		type = spitInput[1]
+		operant = splitInput[2]
+		name = splitInput[3]
+		
+		
+		print('lol')
+		
 	
-	input1 = input('Input: ')
-	if input1 != '7':
-		print('1-connect')
-		print('2-disconnect')
-		print('3-POST')
-		print('4-GET')
-		print('5-PIN')
-		print('6-UNPIN')
-		print('7-exit')
+	elif commandInput == 'PIN':
 		
+		x = splitInput[1]
+		y = splitInput[2]
+		pinned = False
+		
+		for i in range(len(noteList)):
+			if noteList[i].x == x and noteList[i].y == y:
+				pinned = True
+				noteList[i].pins += 1 
+		  
+		if pinned == True:
+			output = 'PIN success'
+		else:
+			output = 'PIN failed'
+			
+		
+	
+	elif commandInput == 'UNPIN':
+		
+		x = splitInput[1]
+		y = splitInput[2]
+		unpinned = False
+		
+		for i in range(len(noteList)):
+			if noteList[i].x == x and noteList[i].y == y:
+				unpinned = True
+				noteList[i].pins -= 1
+				
+		if unpinned == True:
+			output = 'UNPIN failed'
+		else:
+			output = 'UNPIN sucess'
+		connectionSocket.send(output.encode())
+	
+	print(output)
+	connectionSocket.send(output.encode())
+	connectionSocket.close()
+	
 
-
-	output = clientSocket.recv(1024)
-print('From server:', output.decode())
-clientSocket.close()
+serverSocket.close()  
+sys.exit() #Terminate the program after sending the corresponding data	
