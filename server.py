@@ -1,6 +1,7 @@
 # Import socket module
 from socket import * 
 import sys # In order to terminate the program
+from builtins import *
 
 # Create a TCP server socket
 #(AF_INET is used for IPv4 protocols)
@@ -15,7 +16,7 @@ serverPort = 1200
 serverSocket.bind(("", serverPort))
 
 # Listen to at most 1 connection at a time
-serverSocket.listen(1)
+serverSocket.listen(5)
 
 print ('The server is ready to receive')
 
@@ -42,12 +43,32 @@ class Note(object):
 
 	
 
-def pin(x,y):
-	print('pinning')
+# def pin(x,y):
+# 	print('pinning')
+# 
+# def unpin(x,y):
+# 	print('unpinning')
 
-def unpin(x,y):
-	print('unpinning')
+# Declaring board parameters
 
+
+boardWidth = sys.argv[2]
+boardHeight = sys.argv[3]
+colours = []
+noteList = []
+
+def checkColour(colours, colour):
+	count = 0
+	for i in range(len(colours)):
+		if colours[i]==colour:
+			count+=1
+	
+	print(count)
+
+i = 4
+while i < (len(sys.argv) - 1):
+	colours.append(sys.argv[i])
+	i+=1
 
 
 while True:
@@ -56,56 +77,20 @@ while True:
 	# Set up a new connection from the client
 	connectionSocket, addr = serverSocket.accept()
 
-
-
-
-
-
-
 	
-	# splitInput = input1.split()
-	# lower_left = splitInput[1]
-	# upper_right = splitInput[2]
-	# width = splitInput[3]
-	# height = splitInput[4]
-	# color = splitInput[5]
-	# message = splitInput[6:]
-	
-	# s = ' '
-	# joinedMessage = s.join(message)
-	# newNote = Note(lower_left, lower_right, width, height, 'pinned', color, joinedMessage)
-	# if input1 == '3':
-	# 	output = 'case1'
-	# 	print(lower_left)
-	# 	print(upper_right)
-	# 	print(width)
-	# 	print(height)
-	# 	print('color', color)
-	# 	print(joinedMessage)
 
-	# elif input1 == '4':
-	# 	output = 'case2'
-
-	# elif input1 == '5':
-	# 	output = 'case3'
-	
-	# elif input1 == '6':
-	# 	output = 'case4'
-	
-	# elif input1 == '1':
-	# 	output = 'case 5'
-	
-	# elif input1 == '2':
-	# 	output = 'Disconnecting from server'
-	# 	connectionSocket.send(output.encode())
-	# 	connectionSocket.close()
-		
 	input2 = connectionSocket.recv(1024).decode()
 	print(input2)
 
 	splitInput = input2.split()
-	
 	commandInput = splitInput[0]
+	
+	
+	if input2 == 7:
+		print('lmao1')
+		sys.exit()
+
+
 
 	if commandInput == 'POST':
 		x = splitInput[1]
@@ -117,10 +102,65 @@ while True:
 
 		s = ' '
 		joinedMessage = s.join(message)
+		
+		if (colour in colours) and (x + width < boardWidth) and (y + height < boardHeight):
+		
+			note = Note(x, y, width, height, colour, joinedMessage, 0)
+			noteList.append(note)
+			output = 'commandInput'
+		else:
+			output = 'ERROR: The note was not added since ', colour, ' is not a valid colour'
+		
 
-		note = Note(x, y, width, height, colour, joinedMessage, 0)
-
-	output = commandInput
+	elif commandInput == 'GET':
+		
+		type = spitInput[1]
+		operant = splitInput[2]
+		name = splitInput[3]
+		
+		
+		print('lol')
+		
+	
+	elif commandInput == 'PIN':
+		
+		x = splitInput[1]
+		y = splitInput[2]
+		pinned = False
+		
+		for i in range(len(noteList)):
+			if noteList[i].x == x and noteList[i].y == y:
+				pinned = True
+				noteList[i].pins += 1 
+		  
+		if pinned == True:
+			output = 'PIN success'
+		else:
+			output = 'PIN failed'
+			
+			
+	elif commandInput == 'UNPIN':
+		x = splitInput[1]
+		y = splitInput[2]
+		
+	
+	elif commandInput == 'UNPIN':
+		
+		x = splitInput[1]
+		y = splitInput[2]
+		unpinned = False
+		
+		for i in range(len(noteList)):
+			if noteList[i].x == x and noteList[i].y == y:
+				unpinned = True
+				noteList[i].pins -= 1
+				
+		if unpinned == True:
+			output = 'UNPIN failed'
+		else:
+			output = 'UNPIN sucess'
+		connectionSocket.send(output.encode())
+		
 	connectionSocket.send(output.encode())
 	connectionSocket.close()
 	
