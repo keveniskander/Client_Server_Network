@@ -23,7 +23,7 @@ connectionEstablished = False
 
 input1 = input('Input: ')
 
-while input1 != 7:
+while input1 != '7':
 		
 	
 	if input1 == '3':
@@ -45,15 +45,21 @@ while input1 != 7:
 	elif input1 == '4':
 		input2 = input('GET ')
 		
+		input2 = 'GET' + input2
+		clientSocket.send(input2.encode())
+		
 		output = clientSocket.recv(1024)
 
 	elif input1 == '5':
-		input2 = input('PIN')
+		input2 = input('PIN ')
+		
+		input2 = 'PIN ' + input2
+		clientSocket.send(input2.encode())
 		
 		output = clientSocket.recv(1024)
 
 	elif input1 == '6':
-		input2 = input('UNPIN')
+		input2 = input('UNPIN ')
 		
 		output = clientSocket.recv(1024)
 
@@ -67,15 +73,23 @@ while input1 != 7:
 		clientSocket.close()
 
 	elif input1 == '7':
+		clientSocket.send('EXIT')
 		print('...Exiting program...')
 		clientSocket.close()
-		sys.exit()
+		sys.exit(0)
 		break
 	
 	input1 = input('Input: ')
-	
+	if input1 != '7':
+		print('1-connect')
+		print('2-disconnect')
+		print('3-POST')
+		print('4-GET')
+		print('5-PIN')
+		print('6-UNPIN')
+		print('7-exit')
+		
 
-print(input1)
 
 
 print('From server:', output.decode())
