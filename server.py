@@ -21,6 +21,9 @@ class Note(object):
 		self.y = y
 		self.pins=pins
 
+	def __str__(self):
+		return 'x-coordinate: %s y-coordinate: %s width: %s height: %s colour: %s message: %s pins: %s' % (self.x, self.y, self.width, self.height, self.colour, self.message, self.pins)
+
 	
 	
 # Declaring board parameters
@@ -33,7 +36,7 @@ noteList = []
 # Fill colours array with colour values from argv
 i = 4
 while i < (len(sys.argv)):
-    	
+		
 	colours.append(sys.argv[i])
 
 	i+=1
@@ -53,25 +56,29 @@ class ClientThread(threading.Thread):
 		
 		
 		
-		#self.csocket.send(bytes("Hi, This is from Server..",'utf-8'))
+		# self.csocket.send(bytes("Hi, This is from Server..",'utf-8'))
 		msg = ''
 		while True:
 			print('TESTING 0')
-			
+
+			try:
+				data = self.csocket.recv(2048)
+			except:
+				print('AN ERROR OCCURED')
+			msg = data.decode()
 			splitMsg =msg.split()
 			
 			if len(splitMsg) > 0:
 				commandInput = splitMsg[0]
 			
-			data = self.csocket.recv(2048)
-			msg = data.decode()
+			
 			
 			if msg == '1':
-				break
+				print('still have to code connect')
 			
 			if msg=='2':
 				
-				break
+				print('still have to code disconnect')
 			print(splitMsg)
 			
 			if commandInput == 'POST':
@@ -100,19 +107,114 @@ class ClientThread(threading.Thread):
 						note = Note(x, y, width, height, colour, joinedMessage, 0)
 						noteList.append(note)
 						msg = 'NOTE POSTED'
-    					
+						
 
 					else:
-    						
+							
 						msg = 'NOTE NOT POSTED'
 
 				else:
-    				
+					
 					msg = 'NOTE NOT POSTED'
-
+			
+			
 
 			if commandInput == 'GET':
 				print('GET')
+
+				flag = 0
+				incr = 0
+
+				secondCommand = splitMsg[1]
+				containsArray = noteList.copy()
+				
+				while incr < 4:
+					if 'contains' in splitMsg and flag <= 2:
+						# print('TESTING1')
+
+						try:
+							containsIndex = splitMsg.index('contains')
+							x = splitMsg[containsIndex + 1]
+							y = splitMsg[containsIndex + 2]
+							flag += 1
+
+							for i in range(len(noteList)):
+
+								if noteList[i].x != int(x) and noteList[i].y != int(y):
+									containsArray.pop(i)
+								
+							print('CONTAINS GET MESSAGE: ')
+							
+							
+
+						except:
+							print('ERROR: List index out of range')
+
+					if ('colour' in splitMsg or 'color' in splitMsg) and flag <= 2:
+						print('TESTING2')
+
+						try: 
+							containsIndex = splitMsg.index('colour')
+							containsArray = noteList.copy()
+							term = splitMsg[containsIndex + 2]
+							flag += 1
+
+							for i in range(len(noteList)):
+								
+								if noteList[i].colour != term:
+									containsArray.pop(i)
+
+							
+
+						except:
+
+							print('ERROR: term not found')
+					
+					if 'refersTo' in splitMsg and flag <= 2:
+						print('TESTING3')
+
+						try:
+
+							containsIndex = splitMsg.index('refersTo')
+							term = splitMsg[containsIndex + 2]
+							flag += 1
+
+							for i in range(len(noteList)):
+								
+								if term not in noteList[i].message:
+									containsArray.pop(i)
+
+						except:
+
+							print('ERROR: term not found')
+
+					if 'PINS' in splitMsg and flag <= 2:
+						print('TESTING 4')
+
+						try:
+
+							containsIndex = splitMsg.index('PINS')
+							x = splitMsg[containsIndex + 1]
+							y = splitMsg[containsIndex + 2]
+							flag += 1
+
+							for i in range(len(noteList)):
+								
+								if (noteList[i].x == int(x) and noteList[i].y == int(y)) and noteList[i].pins > 0:
+									containsArray.pop(i)
+
+						except:
+
+							print('ERROR: term not found')
+
+					
+					incr += 1
+
+				for i in range(len(containsArray)):
+								
+					msg += str(containsArray[i])
+					msg += ' '
+
 
 			if commandInput == 'PIN':
 				
@@ -122,7 +224,11 @@ class ClientThread(threading.Thread):
 					y = splitMsg[2]
 					
 					for i in range(len(noteList)):
-						noteList[i].pins += 1
+							
+						if noteList[i].x == int(x) and noteList[i].y == int(y):
+							noteList[i].pins += 1
+
+
 
 					msg = 'PINNED'
 				msg = 'NOT PINNED'
@@ -135,15 +241,21 @@ class ClientThread(threading.Thread):
 					y = splitMsg[2]
 
 					for i in range(len(noteList)):
+						
+						if noteList[i].x == int(x) and noteList[i].y == int(y):
 							
-						if noteList[i].pins >0:
-								
-							noteList[i].pins -= 1
+							if noteList[i].pins >0:
+									
+								noteList[i].pins -= 1
 
 			print ("from client", msg)
 			
 			
 			self.csocket.send(bytes(msg,'UTF-8'))
+			
+
+
+			flag = 0
 			commandInput = ''
 			x = ''
 			y = ''
@@ -151,6 +263,8 @@ class ClientThread(threading.Thread):
 			height = ''
 			colour = ''
 			message = ''
+			msg = ''
+			containsArray = []
 			
 
 
@@ -162,7 +276,7 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.bind((LOCALHOST, PORT))
 print("Server started")
-print("...Waiting for client request..")
+print("...Waiting for client request...")
 
 
 
